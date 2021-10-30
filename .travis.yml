@@ -21,4 +21,5 @@ notifications:
 
 env:
   global:
-    - CODECOV_TOKEN="a53ffb29-ff15-46d0-a311-3a14f11409fc"
+    - CODECOV_TOKEN=738442f3-929e-48ee-8758-ccfb4c8da043
+  #  - CODECOV_TOKEN="a53ffb29-ff15-46d0-a311-3a14f11409fc"
