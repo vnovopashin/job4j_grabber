@@ -11,6 +11,10 @@ import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 /**
+ * Класс демонстрирует работу с внешней библиотекой Quartz,
+ * которая позволяет выполнять действия с периодичностью.
+ * Например, отправка рассылки, создание копии базы данных.
+ *
  * @author Vasiliy Novopashin
  * @version 1.0
  */
@@ -34,6 +38,12 @@ public class AlertRabbit {
         }
     }
 
+    /**
+     * Метод читает файл конфигурации в котором содержится время
+     * запуска задачи
+     *
+     * @return возвращает время с которой будет происходить запуск задачи
+     */
     public static int readAlertRabbitProperties() {
         String interval;
         try (InputStream in =
@@ -47,6 +57,9 @@ public class AlertRabbit {
         return Integer.parseInt(interval);
     }
 
+    /**
+     * Класс представляет собой задачу, которая будет выполняться в нужной периодичности
+     */
     public static class Rabbit implements Job {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
