@@ -13,8 +13,8 @@ import org.junit.Test;
 public class AlertRabbitTest {
 
     @Test
-    public void whenReadAlertRabbitPropertiesThanTen() {
-        int result = AlertRabbit.readAlertRabbitProperties();
+    public void whenGetIntervalThanTen() {
+        int result = AlertRabbit.getInterval();
         Assert.assertEquals(result, 10);
     }
 }
