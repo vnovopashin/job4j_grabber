@@ -3,6 +3,8 @@ package ru.job4j.quartz;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Properties;
+
 
 /**
  * Класс тестирует методы класса AlertRabbit
@@ -14,7 +16,8 @@ public class AlertRabbitTest {
 
     @Test
     public void whenGetIntervalThanTen() {
-        int result = AlertRabbit.getInterval();
+        Properties properties = AlertRabbit.readProperties();
+        int result = Integer.parseInt(properties.getProperty("rabbit.interval"));
         Assert.assertEquals(result, 10);
     }
 }
