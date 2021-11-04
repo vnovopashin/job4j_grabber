@@ -4,10 +4,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.Properties;
 
@@ -27,7 +24,8 @@ public class AlertRabbit {
 
     public static void main(String[] args) {
         try {
-            Connection connection = getConnection();
+            Properties properties = readProperties();
+            Connection connection = getConnection(properties);
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -36,7 +34,7 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(getInterval())
+                    .withIntervalInSeconds(Integer.parseInt(properties.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -51,51 +49,47 @@ public class AlertRabbit {
     }
 
     /**
-     * Метод выполняет подключение к базе,
-     * необходимые настройки метод получает из файла rabbit.properties
+     * Метод читает конфигурационный файл rabbit.properties
      *
-     * @return возвращает соединение с базой данных
+     * @return возвращает прочитанный файл
      */
-    public static Connection getConnection() {
-        try (InputStream in = Rabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
+    public static Properties readProperties() {
+        try (InputStream in =
+                     Rabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             Properties config = new Properties();
             config.load(in);
-            Class.forName(config.getProperty("driver-class-name"));
-            return DriverManager.getConnection(
-                    config.getProperty("url"),
-                    config.getProperty("username"),
-                    config.getProperty("password")
-            );
+            return config;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
     }
 
     /**
-     * Метод читает файл конфигурации в котором содержится время
-     * запуска задачи
+     * Метод выполняет подключение к базе,
+     * необходимые настройки метод получает из файла rabbit.properties
      *
-     * @return возвращает время с которой будет происходить запуск задачи
+     * @param properties принимает в параметры properties
+     * @return возвращает соединение с базой
+     * @throws ClassNotFoundException бросает исключение, если класс не найден
+     * @throws SQLException           бросает исключение, если возникает ошибка доступа к базе данных
      */
-    public static int getInterval() {
-        String interval;
-        try (InputStream in =
-                     AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            Properties config = new Properties();
-            config.load(in);
-            interval = config.getProperty("rabbit.interval");
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        return Integer.parseInt(interval);
+    public static Connection getConnection(Properties properties) throws ClassNotFoundException, SQLException {
+        Class.forName(properties.getProperty("driver-class-name"));
+        return DriverManager.getConnection(
+                properties.getProperty("url"),
+                properties.getProperty("username"),
+                properties.getProperty("password")
+        );
     }
 
     /**
      * Метод записывает данные в таблицу
      */
     public static void insert() {
-        try (Connection connection = getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("insert into rabbit (created_date) values (?)")) {
+        Properties properties = readProperties();
+        try (Connection connection = getConnection(properties)) {
+            try (PreparedStatement statement =
+                         connection.prepareStatement("insert into rabbit (created_date) values (?)")) {
                 statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                 statement.execute();
             }
