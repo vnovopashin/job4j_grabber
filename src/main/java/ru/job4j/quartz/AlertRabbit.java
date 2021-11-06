@@ -23,9 +23,8 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
 
     public static void main(String[] args) {
-        try {
-            Properties properties = readProperties();
-            Connection connection = getConnection(properties);
+        Properties properties = readProperties();
+        try (Connection connection = getConnection(properties)) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -83,22 +82,6 @@ public class AlertRabbit {
     }
 
     /**
-     * Метод записывает данные в таблицу
-     */
-    public static void insert() {
-        Properties properties = readProperties();
-        try (Connection connection = getConnection(properties)) {
-            try (PreparedStatement statement =
-                         connection.prepareStatement("insert into rabbit (created_date) values (?)")) {
-                statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-                statement.execute();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Класс представляет собой задачу, которая будет выполняться в нужной периодичности
      */
     public static class Rabbit implements Job {
@@ -110,7 +93,15 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
-            insert();
+            Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("connection");
+            try {
+                PreparedStatement statement =
+                        connection.prepareStatement("insert into rabbit (created_date) values (?)");
+                statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+                statement.execute();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
