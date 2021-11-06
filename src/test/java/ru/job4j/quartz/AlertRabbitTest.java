@@ -15,9 +15,9 @@ import java.util.Properties;
 public class AlertRabbitTest {
 
     @Test
-    public void whenGetIntervalThanTen() {
+    public void whenGetIntervalThanFive() {
         Properties properties = AlertRabbit.readProperties();
         int result = Integer.parseInt(properties.getProperty("rabbit.interval"));
-        Assert.assertEquals(result, 10);
+        Assert.assertEquals(result, 5);
     }
 }
