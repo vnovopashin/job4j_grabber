@@ -5,9 +5,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Класс парсит сайт www.sql.ru с помощью библиотеки jsoup
  *
@@ -16,21 +13,10 @@ import java.util.List;
  */
 public class SqlRuParse {
     public static void main(String[] args) throws Exception {
-        String url = "https://www.sql.ru/forum/job-offers";
-        Document doc = Jsoup.connect(url).get();
-        Elements table = doc.select("table[class=sort_options]");
-        Elements row = table.select("a[href]");
-        List<String> urls = new ArrayList<>();
-        urls.add(url);
+        String url = "https://www.sql.ru/forum/job-offers/";
 
-        for (Element element : row) {
-            if (element.attr("href").matches("https://www.sql.ru/forum/job-offers/[1-5]{1}")) {
-                urls.add(element.attr("href"));
-            }
-        }
-
-        for (String s : urls) {
-            Document document = Jsoup.connect(s).get();
+        for (int i = 1; i <= 5; i++) {
+            Document document = Jsoup.connect(url + i).get();
             Elements rows = document.select(".postslisttopic");
             for (Element element : rows) {
                 Element href = element.child(0);
