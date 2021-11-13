@@ -13,6 +13,8 @@ import java.util.Map;
  * @version 1.0
  */
 public class SqlRuDateTimeParser implements DateTimeParser {
+
+    private final static DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dMMyyHHmm");
     private static final Map<String, String> MONTHS = Map.ofEntries(
             Map.entry("янв", "01"),
             Map.entry("фев", "02"),
@@ -37,11 +39,9 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     public LocalDateTime parse(String parse) {
         String[] arr = parse.split("[\\p{Punct}\\s]+");
         if (arr[0].equals("сегодня")) {
-            LocalTime time = LocalTime.of(Integer.parseInt(arr[1]), Integer.parseInt(arr[2]));
-            return LocalDateTime.of(LocalDate.now(), time);
+            return getTodayOrYesterday(arr, 0);
         } else if (arr[0].equals("вчера")) {
-            LocalTime time = LocalTime.of(Integer.parseInt(arr[1]), Integer.parseInt(arr[2]));
-            return LocalDateTime.of(LocalDate.now().minusDays(1), time);
+            return getTodayOrYesterday(arr, 1);
         }
         for (Map.Entry<String, String> entry : MONTHS.entrySet()) {
             if (entry.getKey().equals(arr[1])) {
@@ -49,9 +49,19 @@ public class SqlRuDateTimeParser implements DateTimeParser {
                 break;
             }
         }
+        return LocalDateTime.parse(arr[0].concat(arr[1]).concat(arr[2]).concat(arr[3]).concat(arr[4]), DTF);
+    }
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dMMyyHHmm");
-
-        return LocalDateTime.parse(arr[0].concat(arr[1]).concat(arr[2]).concat(arr[3]).concat(arr[4]), dtf);
+    /**
+     * Метод преобразует дату вида сегодня, 20:30 или вчера, 12:15
+     *
+     * @param arr массив примерно следующего содержания [сегодня, 20, 30]
+     * @param days если нужно получить сегодняшнюю дату, days устанавливаем равным 0,
+     *             если вчерашний тогда 1
+     * @return возвращает дату в виде объекта LocalDateTime
+     */
+    private LocalDateTime getTodayOrYesterday(String[] arr, int days) {
+        LocalTime time = LocalTime.of(Integer.parseInt(arr[1]), Integer.parseInt(arr[2]));
+        return LocalDateTime.of(LocalDate.now().minusDays(days), time);
     }
 }
