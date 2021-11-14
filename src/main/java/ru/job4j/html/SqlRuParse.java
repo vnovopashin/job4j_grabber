@@ -22,19 +22,22 @@ public class SqlRuParse {
      *
      * @param link ссылка на вакансию сайта www.sql.ru
      * @return возвращает объект типа Post
-     * @throws IOException бросает исключение в случае ошибки ввода/вывода
      */
-    public Post detail(String link) throws IOException {
-        Document doc = Jsoup.connect(link).get();
-        Element description = doc.select("td[class=msgBody]").first().nextElementSibling();
-        Element date = doc.select("td[class=msgFooter]").first();
-        Element title = doc.select("td[class=messageHeader]").first();
-        String preparedDate = date.text().split("\\[")[0].trim();
+    public Post detail(String link) {
         Post post = new Post();
-        post.setTitle(title.text());
-        post.setLink(link);
-        post.setDescription(description.text());
-        post.setLocalDateTime(new SqlRuDateTimeParser().parse(preparedDate));
+        try {
+            Document doc = Jsoup.connect(link).get();
+            Element description = doc.select("td[class=msgBody]").first().nextElementSibling();
+            Element date = doc.select("td[class=msgFooter]").first();
+            Element title = doc.select("td[class=messageHeader]").first();
+            String preparedDate = date.text().split("\\[")[0].trim();
+            post.setTitle(title.text());
+            post.setLink(link);
+            post.setDescription(description.text());
+            post.setLocalDateTime(new SqlRuDateTimeParser().parse(preparedDate));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return post;
     }
 
