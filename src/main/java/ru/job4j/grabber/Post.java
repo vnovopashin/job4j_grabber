@@ -78,11 +78,11 @@ public class Post {
     @Override
     public String toString() {
         return "Post{"
-                + "id=" + id
-                + ", title='" + title + '\''
-                + ", link='" + link + '\''
-                + ", description='" + description + '\''
-                + ", localDateTime=" + localDateTime
-                + '}';
+                + " \n id=" + id
+                + ",\n title='" + title + '\''
+                + ",\n link='" + link + '\''
+                + ",\n description='" + description + '\''
+                + ",\n localDateTime=" + localDateTime
+                + "\n" + '}';
     }
 }
