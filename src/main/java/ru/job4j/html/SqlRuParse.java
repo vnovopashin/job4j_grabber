@@ -69,7 +69,7 @@ public class SqlRuParse implements Parse {
             post.setTitle(title.text());
             post.setLink(link);
             post.setDescription(description.text());
-            post.setLocalDateTime(new SqlRuDateTimeParser().parse(preparedDate));
+            post.setLocalDateTime(dateTimeParser.parse(preparedDate));
         } catch (IOException e) {
             e.printStackTrace();
         }
