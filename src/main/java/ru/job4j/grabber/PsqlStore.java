@@ -70,15 +70,10 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public List<Post> getAll() {
         List<Post> posts = new ArrayList<>();
-        Post post = new Post();
         try (PreparedStatement statement = cnn.prepareStatement("select * from post")) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    post.setId(resultSet.getInt("id"));
-                    post.setTitle(resultSet.getString("name"));
-                    post.setDescription(resultSet.getString("text"));
-                    post.setLink(resultSet.getString("link"));
-                    post.setLocalDateTime(resultSet.getTimestamp("created").toLocalDateTime());
+                    Post post = getPost(resultSet);
                     posts.add(post);
                 }
             }
@@ -96,24 +91,37 @@ public class PsqlStore implements Store, AutoCloseable {
      */
     @Override
     public Post findById(int id) {
-        Post post = new Post();
         try (PreparedStatement statement =
                      cnn.prepareStatement("select * from post where id = ?")) {
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    post.setId(resultSet.getInt("id"));
-                    post.setTitle(resultSet.getString("name"));
-                    post.setDescription(resultSet.getString("text"));
-                    post.setLink(resultSet.getString("link"));
-                    post.setLocalDateTime(resultSet.getTimestamp("created").toLocalDateTime());
-                    return post;
+                    return getPost(resultSet);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Метод инициализирует объект типа Post,
+     * значениями полученными из базы данных
+     *
+     * @param resultSet результирующий набор данных полученных в результате SQL запроса
+     * @return возвращает объект типа Post
+     * @throws SQLException бросает исключение в случае ошибки доступа к базе данных
+     *                      или других ошибках связанных с базой данных
+     */
+    private Post getPost(ResultSet resultSet) throws SQLException {
+        Post post = new Post();
+        post.setId(resultSet.getInt("id"));
+        post.setTitle(resultSet.getString("name"));
+        post.setDescription(resultSet.getString("text"));
+        post.setLink(resultSet.getString("link"));
+        post.setLocalDateTime(resultSet.getTimestamp("created").toLocalDateTime());
+        return post;
     }
 
     /**
