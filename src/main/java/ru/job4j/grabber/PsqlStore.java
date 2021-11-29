@@ -45,7 +45,7 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public void save(Post post) {
         try (PreparedStatement statement =
-                     cnn.prepareStatement("insert into post(name, text, link, created) values (?,?,?,?)",
+                     cnn.prepareStatement("insert into post(name, text, link, created) values (?,?,?,?) on conflict do nothing",
                              Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getDescription());
@@ -70,7 +70,7 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public List<Post> getAll() {
         List<Post> posts = new ArrayList<>();
-        try (PreparedStatement statement = cnn.prepareStatement("select * from post")) {
+        try (PreparedStatement statement = cnn.prepareStatement("select * from post order by id")) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Post post = getPost(resultSet);
