@@ -24,6 +24,11 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Grabber implements Grab {
     private final Properties cfg = new Properties();
 
+    /**
+     * Метод создает экземпляр класса PsqlStore для хранения и манипуляции данными
+     *
+     * @return возвращает экземпляр класса PsqlStore
+     */
     public Store store() {
         return new PsqlStore(cfg);
     }
@@ -97,9 +102,7 @@ public class Grabber implements Grab {
             Parse parse = (Parse) map.get("parse");
             List<Post> postList = parse.list("https://www.sql.ru/forum/job-offers/");
             for (Post post : postList) {
-                if (post.getTitle().toLowerCase().contains("java")) {
-                    store.save(post);
-                }
+                store.save(post);
             }
         }
     }
